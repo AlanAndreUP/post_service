@@ -1,0 +1,48 @@
+{
+  "name": "foro-service",
+  "version": "1.0.0",
+  "description": "API hexagonal DDD para sistema de blogs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "docs:generate": "node -e \"console.log('Documentación disponible en: http://localhost:3000/api-docs')\"",
+    "docs:validate": "node -e \"const specs = require('./src/infrastructure/swagger/swaggerConfig'); console.log('✅ Especificación Swagger válida'); console.log('📊 Endpoints documentados:', Object.keys(specs.paths).length);\"",
+    "docker:build": "docker build -t foro-service .",
+    "docker:run": "docker run -p 3000:3000 foro-service",
+    "docker:compose": "docker-compose up -d",
+    "docker:compose:down": "docker-compose down",
+    "docker:compose:logs": "docker-compose logs -f"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.10.0",
+    "helmet": "^7.0.0",
+    "joi": "^17.9.2",
+    "mongoose": "^7.5.0",
+    "multer": "^1.4.5-lts.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "jest": "^29.6.2",
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "api",
+    "hexagonal",
+    "ddd",
+    "blog",
+    "mongodb"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT"
+}

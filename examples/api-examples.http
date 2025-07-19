@@ -1,0 +1,93 @@
+### Foro Service API - Ejemplos de Uso
+
+### 1. Health Check
+GET http://localhost:3000/health
+
+### 2. Crear un Post (sin imágenes)
+POST http://localhost:3000/api/posts
+Content-Type: multipart/form-data
+
+{
+  "title": "Mi primer post sobre tecnología",
+  "body": "Este es el contenido de mi primer post. Hablaré sobre las últimas tendencias en desarrollo web y arquitectura de software.",
+  "authors": "[{\"id\":\"1\",\"name\":\"Juan Pérez\",\"email\":\"juan@example.com\",\"avatar\":\"https://example.com/avatar1.jpg\"}]",
+  "tags": "[{\"value\":\"tecnología\",\"color\":\"#007bff\"},{\"value\":\"programación\",\"color\":\"#28a745\"}]"
+}
+
+### 3. Crear un Post con imágenes
+POST http://localhost:3000/api/posts
+Content-Type: multipart/form-data
+
+{
+  "title": "Post con imágenes",
+  "body": "Este post incluye imágenes para demostrar la funcionalidad de subida de archivos.",
+  "authors": "[{\"id\":\"2\",\"name\":\"María García\",\"email\":\"maria@example.com\"}]",
+  "tags": "[{\"value\":\"tutorial\",\"color\":\"#ffc107\"}]",
+  "images": [@imagen1.jpg, @imagen2.png]
+}
+
+### 4. Obtener todos los posts (paginación)
+GET http://localhost:3000/api/posts?page=1&limit=5
+
+### 5. Obtener posts con filtros
+GET http://localhost:3000/api/posts?page=1&limit=10&authorId=1&tag=tecnología
+
+### 6. Obtener post por ID
+GET http://localhost:3000/api/posts/POST_ID_AQUI
+
+### 7. Buscar posts
+GET http://localhost:3000/api/posts/search?q=tecnología&page=1&limit=10
+
+### 8. Obtener posts por autor
+GET http://localhost:3000/api/posts/author/1?page=1&limit=10
+
+### 9. Obtener posts por tag
+GET http://localhost:3000/api/posts/tag/tecnología?page=1&limit=10
+
+### 10. Subir imágenes independientemente
+POST http://localhost:3000/api/posts/upload
+Content-Type: multipart/form-data
+
+{
+  "images": [@imagen1.jpg, @imagen2.png, @imagen3.gif]
+}
+
+### 11. Crear post con múltiples autores
+POST http://localhost:3000/api/posts
+Content-Type: multipart/form-data
+
+{
+  "title": "Post colaborativo",
+  "body": "Este post fue escrito por múltiples autores trabajando en equipo.",
+  "authors": "[{\"id\":\"1\",\"name\":\"Juan Pérez\",\"email\":\"juan@example.com\"},{\"id\":\"2\",\"name\":\"María García\",\"email\":\"maria@example.com\"},{\"id\":\"3\",\"name\":\"Carlos López\",\"email\":\"carlos@example.com\"}]",
+  "tags": "[{\"value\":\"colaboración\",\"color\":\"#17a2b8\"},{\"value\":\"equipo\",\"color\":\"#6f42c1\"}]"
+}
+
+### 12. Crear post con muchos tags
+POST http://localhost:3000/api/posts
+Content-Type: multipart/form-data
+
+{
+  "title": "Post con múltiples categorías",
+  "body": "Este post cubre varios temas y por eso tiene múltiples tags.",
+  "authors": "[{\"id\":\"4\",\"name\":\"Ana Rodríguez\",\"email\":\"ana@example.com\"}]",
+  "tags": "[{\"value\":\"frontend\",\"color\":\"#007bff\"},{\"value\":\"backend\",\"color\":\"#28a745\"},{\"value\":\"database\",\"color\":\"#ffc107\"},{\"value\":\"api\",\"color\":\"#dc3545\"},{\"value\":\"ddd\",\"color\":\"#6f42c1\"}]"
+}
+
+### 13. Obtener posts con filtros de fecha
+GET http://localhost:3000/api/posts?page=1&limit=10&dateFrom=2024-01-01&dateTo=2024-12-31
+
+### 14. Búsqueda avanzada
+GET http://localhost:3000/api/posts/search?q=arquitectura hexagonal&page=1&limit=5
+
+### 15. Obtener posts con límite personalizado
+GET http://localhost:3000/api/posts?page=1&limit=20
+
+### Notas importantes:
+# - Reemplaza POST_ID_AQUI con un ID real de post
+# - Para las imágenes, usa archivos reales en tu sistema
+# - Los IDs de autores deben ser consistentes entre requests
+# - Las fechas deben estar en formato ISO (YYYY-MM-DD)
+# - El límite máximo de paginación es 100
+# - El tamaño máximo de archivo es 5MB
+# - Tipos de archivo permitidos: JPEG, PNG, GIF, WebP 

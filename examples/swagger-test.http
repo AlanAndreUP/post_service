@@ -1,0 +1,53 @@
+### Pruebas para Documentación Swagger
+
+### 1. Verificar que Swagger esté funcionando
+GET http://localhost:3000/api-docs
+
+### 2. Obtener especificación JSON de Swagger
+GET http://localhost:3000/swagger.json
+
+### 3. Health Check (para verificar estado de la API)
+GET http://localhost:3000/health
+
+### 4. Información de la API
+GET http://localhost:3000/
+
+### 5. Crear un post de prueba para Swagger
+POST http://localhost:3000/api/posts
+Content-Type: multipart/form-data
+
+{
+  "title": "Post de prueba para Swagger",
+  "body": "Este post es para probar la documentación de Swagger y verificar que todos los campos estén correctamente documentados.",
+  "authors": "[{\"id\":\"swagger-test-1\",\"name\":\"Usuario Swagger\",\"email\":\"swagger@test.com\"}]",
+  "tags": "[{\"value\":\"swagger\",\"color\":\"#ff6b6b\"},{\"value\":\"documentación\",\"color\":\"#4ecdc4\"}]"
+}
+
+### 6. Obtener posts para verificar paginación
+GET http://localhost:3000/api/posts?page=1&limit=5
+
+### 7. Buscar posts
+GET http://localhost:3000/api/posts/search?q=swagger&page=1&limit=3
+
+### 8. Obtener posts por autor
+GET http://localhost:3000/api/posts/author/swagger-test-1?page=1&limit=5
+
+### 9. Obtener posts por tag
+GET http://localhost:3000/api/posts/tag/swagger?page=1&limit=5
+
+### 10. Subir imagen de prueba
+POST http://localhost:3000/api/posts/upload
+Content-Type: multipart/form-data
+
+{
+  "images": [@test-image.jpg]
+}
+
+### Notas para probar Swagger:
+# 1. Abre http://localhost:3000/api-docs en tu navegador
+# 2. Verifica que todos los endpoints estén documentados
+# 3. Prueba la funcionalidad "Try it out" en cada endpoint
+# 4. Verifica que los esquemas de datos estén completos
+# 5. Comprueba que los ejemplos de requests sean correctos
+# 6. Verifica que los códigos de respuesta estén documentados
+# 7. Prueba la validación de parámetros en tiempo real 
