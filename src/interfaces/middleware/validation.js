@@ -11,10 +11,25 @@ const createPostSchema = Joi.object({
     'string.empty': 'El cuerpo del post es requerido',
     'string.min': 'El cuerpo del post debe tener al menos 1 carácter'
   }),
-  authors: Joi.string().required().messages({
-    'string.empty': 'Los autores son requeridos'
+  authors: Joi.alternatives().try(
+    Joi.string().required(),
+    Joi.array().items(Joi.object({
+      id: Joi.string().required(),
+      name: Joi.string().required(),
+      email: Joi.string().email().required(),
+      avatar: Joi.string().allow(null).optional()
+    })).min(1).required()
+  ).messages({
+    'string.empty': 'Los autores son requeridos',
+    'array.min': 'Al menos un autor es requerido'
   }),
-  tags: Joi.string().optional().default('[]')
+  tags: Joi.alternatives().try(
+    Joi.string().optional().default('[]'),
+    Joi.array().items(Joi.object({
+      value: Joi.string().required(),
+      color: Joi.string().optional().default('#007bff')
+    })).optional().default([])
+  )
 });
 
 // Esquema de validación para actualizar post
@@ -28,10 +43,25 @@ const updatePostSchema = Joi.object({
     'string.empty': 'El cuerpo del post no puede estar vacío',
     'string.min': 'El cuerpo del post debe tener al menos 1 carácter'
   }),
-  authors: Joi.string().optional().messages({
-    'string.empty': 'Los autores no pueden estar vacíos'
+  authors: Joi.alternatives().try(
+    Joi.string().optional(),
+    Joi.array().items(Joi.object({
+      id: Joi.string().required(),
+      name: Joi.string().required(),
+      email: Joi.string().email().required(),
+      avatar: Joi.string().allow(null).optional()
+    })).min(1).optional()
+  ).messages({
+    'string.empty': 'Los autores no pueden estar vacíos',
+    'array.min': 'Al menos un autor es requerido'
   }),
-  tags: Joi.string().optional()
+  tags: Joi.alternatives().try(
+    Joi.string().optional(),
+    Joi.array().items(Joi.object({
+      value: Joi.string().required(),
+      color: Joi.string().optional().default('#007bff')
+    })).optional()
+  )
 });
 
 // Esquema de validación para paginación
@@ -67,55 +97,63 @@ const validateCreatePost = (req, res, next) => {
       });
     }
 
-    // Validar que authors sea un JSON válido
-    try {
-      const authors = JSON.parse(value.authors);
-      if (!Array.isArray(authors) || authors.length === 0) {
+    // Validar que authors sea un array válido
+    let authors = value.authors;
+    if (typeof authors === 'string') {
+      try {
+        authors = JSON.parse(authors);
+      } catch (parseError) {
         return res.status(400).json({
           success: false,
-          message: 'Al menos un autor es requerido'
+          message: 'Formato de autores inválido'
         });
       }
-
-      // Validar cada autor
-      for (const author of authors) {
-        if (!author.id || !author.name || !author.email) {
-          return res.status(400).json({
-            success: false,
-            message: 'Datos de autor incompletos'
-          });
-        }
-      }
-    } catch (parseError) {
+    }
+    
+    if (!Array.isArray(authors) || authors.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Formato de autores inválido'
+        message: 'Al menos un autor es requerido'
       });
     }
 
+    // Validar cada autor
+    for (const author of authors) {
+      if (!author.id || !author.name || !author.email) {
+        return res.status(400).json({
+          success: false,
+          message: 'Datos de autor incompletos'
+        });
+      }
+    }
+
     // Validar tags si existen
-    try {
-      const tags = JSON.parse(value.tags || '[]');
-      if (!Array.isArray(tags)) {
+    let tags = value.tags || [];
+    if (typeof tags === 'string') {
+      try {
+        tags = JSON.parse(tags);
+      } catch (parseError) {
         return res.status(400).json({
           success: false,
           message: 'Formato de tags inválido'
         });
       }
-
-      for (const tag of tags) {
-        if (!tag.value || tag.value.trim().length === 0) {
-          return res.status(400).json({
-            success: false,
-            message: 'Valor de tag requerido'
-          });
-        }
-      }
-    } catch (parseError) {
+    }
+    
+    if (!Array.isArray(tags)) {
       return res.status(400).json({
         success: false,
         message: 'Formato de tags inválido'
       });
+    }
+
+    for (const tag of tags) {
+      if (!tag.value || tag.value.trim().length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Valor de tag requerido'
+        });
+      }
     }
 
     next();
@@ -139,58 +177,66 @@ const validateUpdatePost = (req, res, next) => {
       });
     }
 
-    // Validar que authors sea un JSON válido si se proporciona
+    // Validar que authors sea un array válido si se proporciona
     if (value.authors) {
-      try {
-        const authors = JSON.parse(value.authors);
-        if (!Array.isArray(authors) || authors.length === 0) {
+      let authors = value.authors;
+      if (typeof authors === 'string') {
+        try {
+          authors = JSON.parse(authors);
+        } catch (parseError) {
           return res.status(400).json({
             success: false,
-            message: 'Al menos un autor es requerido'
+            message: 'Formato de autores inválido'
           });
         }
-
-        // Validar cada autor
-        for (const author of authors) {
-          if (!author.id || !author.name || !author.email) {
-            return res.status(400).json({
-              success: false,
-              message: 'Datos de autor incompletos'
-            });
-          }
-        }
-      } catch (parseError) {
+      }
+      
+      if (!Array.isArray(authors) || authors.length === 0) {
         return res.status(400).json({
           success: false,
-          message: 'Formato de autores inválido'
+          message: 'Al menos un autor es requerido'
         });
+      }
+
+      // Validar cada autor
+      for (const author of authors) {
+        if (!author.id || !author.name || !author.email) {
+          return res.status(400).json({
+            success: false,
+            message: 'Datos de autor incompletos'
+          });
+        }
       }
     }
 
     // Validar tags si se proporcionan
     if (value.tags) {
-      try {
-        const tags = JSON.parse(value.tags);
-        if (!Array.isArray(tags)) {
+      let tags = value.tags;
+      if (typeof tags === 'string') {
+        try {
+          tags = JSON.parse(tags);
+        } catch (parseError) {
           return res.status(400).json({
             success: false,
             message: 'Formato de tags inválido'
           });
         }
-
-        for (const tag of tags) {
-          if (!tag.value || tag.value.trim().length === 0) {
-            return res.status(400).json({
-              success: false,
-              message: 'Valor de tag requerido'
-            });
-          }
-        }
-      } catch (parseError) {
+      }
+      
+      if (!Array.isArray(tags)) {
         return res.status(400).json({
           success: false,
           message: 'Formato de tags inválido'
         });
+      }
+
+      for (const tag of tags) {
+        if (!tag.value || tag.value.trim().length === 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'Valor de tag requerido'
+          });
+        }
       }
     }
 

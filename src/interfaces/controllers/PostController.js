@@ -35,11 +35,36 @@ class PostController {
         }
       }
 
+      // Procesar authors y tags (pueden ser strings JSON o objetos)
+      let authorsArray = authors;
+      if (typeof authors === 'string') {
+        try {
+          authorsArray = JSON.parse(authors);
+        } catch (error) {
+          return res.status(400).json({
+            success: false,
+            message: 'Formato de autores inválido'
+          });
+        }
+      }
+
+      let tagsArray = tags;
+      if (typeof tags === 'string') {
+        try {
+          tagsArray = JSON.parse(tags);
+        } catch (error) {
+          return res.status(400).json({
+            success: false,
+            message: 'Formato de tags inválido'
+          });
+        }
+      }
+
       const postData = {
         title,
         body,
-        authors: JSON.parse(authors || '[]'),
-        tags: JSON.parse(tags || '[]'),
+        authors: authorsArray || [],
+        tags: tagsArray || [],
         images
       };
 
@@ -134,11 +159,44 @@ class PostController {
         }
       }
 
+      // Procesar authors y tags (pueden ser strings JSON o objetos)
+      let authorsArray = undefined;
+      if (authors) {
+        if (typeof authors === 'string') {
+          try {
+            authorsArray = JSON.parse(authors);
+          } catch (error) {
+            return res.status(400).json({
+              success: false,
+              message: 'Formato de autores inválido'
+            });
+          }
+        } else {
+          authorsArray = authors;
+        }
+      }
+
+      let tagsArray = undefined;
+      if (tags) {
+        if (typeof tags === 'string') {
+          try {
+            tagsArray = JSON.parse(tags);
+          } catch (error) {
+            return res.status(400).json({
+              success: false,
+              message: 'Formato de tags inválido'
+            });
+          }
+        } else {
+          tagsArray = tags;
+        }
+      }
+
       const updateData = {
         title,
         body,
-        authors: authors ? JSON.parse(authors) : undefined,
-        tags: tags ? JSON.parse(tags) : undefined,
+        authors: authorsArray,
+        tags: tagsArray,
         images
       };
 
