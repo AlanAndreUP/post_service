@@ -17,6 +17,23 @@ const createPostSchema = Joi.object({
   tags: Joi.string().optional().default('[]')
 });
 
+// Esquema de validación para actualizar post
+const updatePostSchema = Joi.object({
+  title: Joi.string().optional().min(1).max(200).messages({
+    'string.empty': 'El título no puede estar vacío',
+    'string.min': 'El título debe tener al menos 1 carácter',
+    'string.max': 'El título no puede exceder 200 caracteres'
+  }),
+  body: Joi.string().optional().min(1).messages({
+    'string.empty': 'El cuerpo del post no puede estar vacío',
+    'string.min': 'El cuerpo del post debe tener al menos 1 carácter'
+  }),
+  authors: Joi.string().optional().messages({
+    'string.empty': 'Los autores no pueden estar vacíos'
+  }),
+  tags: Joi.string().optional()
+});
+
 // Esquema de validación para paginación
 const paginationSchema = Joi.object({
   page: Joi.number().integer().min(1).optional().default(1),
@@ -110,6 +127,82 @@ const validateCreatePost = (req, res, next) => {
   }
 };
 
+// Middleware para validar actualización de post
+const validateUpdatePost = (req, res, next) => {
+  try {
+    const { error, value } = updatePostSchema.validate(req.body);
+    
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message
+      });
+    }
+
+    // Validar que authors sea un JSON válido si se proporciona
+    if (value.authors) {
+      try {
+        const authors = JSON.parse(value.authors);
+        if (!Array.isArray(authors) || authors.length === 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'Al menos un autor es requerido'
+          });
+        }
+
+        // Validar cada autor
+        for (const author of authors) {
+          if (!author.id || !author.name || !author.email) {
+            return res.status(400).json({
+              success: false,
+              message: 'Datos de autor incompletos'
+            });
+          }
+        }
+      } catch (parseError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Formato de autores inválido'
+        });
+      }
+    }
+
+    // Validar tags si se proporcionan
+    if (value.tags) {
+      try {
+        const tags = JSON.parse(value.tags);
+        if (!Array.isArray(tags)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Formato de tags inválido'
+          });
+        }
+
+        for (const tag of tags) {
+          if (!tag.value || tag.value.trim().length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: 'Valor de tag requerido'
+            });
+          }
+        }
+      } catch (parseError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Formato de tags inválido'
+        });
+      }
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error en validación'
+    });
+  }
+};
+
 // Middleware para validar parámetros de paginación
 const validatePagination = (req, res, next) => {
   try {
@@ -168,6 +261,7 @@ const validateId = (req, res, next) => {
 
 module.exports = {
   validateCreatePost,
+  validateUpdatePost,
   validatePagination,
   validateSearch,
   validateId

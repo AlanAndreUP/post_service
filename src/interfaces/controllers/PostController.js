@@ -2,6 +2,7 @@ const CreatePostUseCase = require('../../application/use-cases/CreatePostUseCase
 const GetPostsUseCase = require('../../application/use-cases/GetPostsUseCase');
 const GetPostByIdUseCase = require('../../application/use-cases/GetPostByIdUseCase');
 const SearchPostsUseCase = require('../../application/use-cases/SearchPostsUseCase');
+const UpdatePostUseCase = require('../../application/use-cases/UpdatePostUseCase');
 const SoftDeletePostUseCase = require('../../application/use-cases/SoftDeletePostUseCase');
 const RestorePostUseCase = require('../../application/use-cases/RestorePostUseCase');
 const GetDeletedPostsUseCase = require('../../application/use-cases/GetDeletedPostsUseCase');
@@ -13,6 +14,7 @@ class PostController {
     this.getPostsUseCase = new GetPostsUseCase(postRepository);
     this.getPostByIdUseCase = new GetPostByIdUseCase(postRepository);
     this.searchPostsUseCase = new SearchPostsUseCase(postRepository);
+    this.updatePostUseCase = new UpdatePostUseCase(postRepository);
     this.softDeletePostUseCase = new SoftDeletePostUseCase(postRepository);
     this.restorePostUseCase = new RestorePostUseCase(postRepository);
     this.getDeletedPostsUseCase = new GetDeletedPostsUseCase(postRepository);
@@ -101,6 +103,55 @@ class PostController {
 
     } catch (error) {
       console.error('Error al obtener post:', error);
+      
+      if (error.message === 'Post no encontrado') {
+        return res.status(404).json({
+          success: false,
+          message: error.message
+        });
+      }
+
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+
+  // PUT /api/posts/:id
+  async updatePost(req, res) {
+    try {
+      const { id } = req.params;
+      const { title, body, authors, tags } = req.body;
+      
+      // Procesar archivos subidos si existen
+      let images = undefined;
+      if (req.files && req.files.length > 0) {
+        images = [];
+        for (const file of req.files) {
+          const fileInfo = await this.fileUploadService.saveFileInfo(file, `${req.protocol}://${req.get('host')}`);
+          images.push(fileInfo);
+        }
+      }
+
+      const updateData = {
+        title,
+        body,
+        authors: authors ? JSON.parse(authors) : undefined,
+        tags: tags ? JSON.parse(tags) : undefined,
+        images
+      };
+
+      const post = await this.updatePostUseCase.execute(id, updateData);
+
+      res.status(200).json({
+        success: true,
+        message: 'Post actualizado exitosamente',
+        data: post.toJSON()
+      });
+
+    } catch (error) {
+      console.error('Error al actualizar post:', error);
       
       if (error.message === 'Post no encontrado') {
         return res.status(404).json({

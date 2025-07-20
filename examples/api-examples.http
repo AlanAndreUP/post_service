@@ -35,16 +35,27 @@ GET http://localhost:3000/s4/api/posts?page=1&limit=10&authorId=1&tag=tecnologí
 ### 6. Obtener post por ID
 GET http://localhost:3000/s4/api/posts/POST_ID_AQUI
 
-### 7. Buscar posts
+### 7. Actualizar un post
+PUT http://localhost:3000/s4/api/posts/POST_ID_AQUI
+Content-Type: multipart/form-data
+
+{
+  "title": "Mi post actualizado sobre tecnología",
+  "body": "Este es el contenido actualizado de mi post con nueva información...",
+  "authors": "[{\"id\":\"1\",\"name\":\"Juan Pérez\",\"email\":\"juan@example.com\"}]",
+  "tags": "[{\"value\":\"tecnología\",\"color\":\"#007bff\"},{\"value\":\"actualización\",\"color\":\"#28a745\"}]"
+}
+
+### 8. Buscar posts
 GET http://localhost:3000/s4/api/posts/search?q=tecnología&page=1&limit=10
 
-### 8. Obtener posts por autor
+### 9. Obtener posts por autor
 GET http://localhost:3000/s4/api/posts/author/1?page=1&limit=10
 
-### 9. Obtener posts por tag
+### 10. Obtener posts por tag
 GET http://localhost:3000/s4/api/posts/tag/tecnología?page=1&limit=10
 
-### 10. Subir imágenes independientemente
+### 11. Subir imágenes independientemente
 POST http://localhost:3000/s4/api/posts/upload
 Content-Type: multipart/form-data
 
@@ -52,16 +63,16 @@ Content-Type: multipart/form-data
   "images": [@imagen1.jpg, @imagen2.png, @imagen3.gif]
 }
 
-### 11. Soft Delete de un post
+### 12. Soft Delete de un post
 DELETE http://localhost:3000/s4/api/posts/POST_ID_AQUI
 
-### 12. Restaurar un post eliminado
+### 13. Restaurar un post eliminado
 POST http://localhost:3000/s4/api/posts/POST_ID_AQUI/restore
 
-### 13. Obtener posts eliminados
+### 14. Obtener posts eliminados
 GET http://localhost:3000/s4/api/posts/deleted?page=1&limit=10
 
-### 14. Crear post con múltiples autores
+### 15. Crear post con múltiples autores
 POST http://localhost:3000/s4/api/posts
 Content-Type: multipart/form-data
 
@@ -72,7 +83,7 @@ Content-Type: multipart/form-data
   "tags": "[{\"value\":\"colaboración\",\"color\":\"#17a2b8\"},{\"value\":\"equipo\",\"color\":\"#6f42c1\"}]"
 }
 
-### 12. Crear post con muchos tags
+### 16. Crear post con muchos tags
 POST http://localhost:3000/s4/api/posts
 Content-Type: multipart/form-data
 
@@ -83,13 +94,13 @@ Content-Type: multipart/form-data
   "tags": "[{\"value\":\"frontend\",\"color\":\"#007bff\"},{\"value\":\"backend\",\"color\":\"#28a745\"},{\"value\":\"database\",\"color\":\"#ffc107\"},{\"value\":\"api\",\"color\":\"#dc3545\"},{\"value\":\"ddd\",\"color\":\"#6f42c1\"}]"
 }
 
-### 13. Obtener posts con filtros de fecha
+### 17. Obtener posts con filtros de fecha
 GET http://localhost:3000/s4/api/posts?page=1&limit=10&dateFrom=2024-01-01&dateTo=2024-12-31
 
-### 14. Búsqueda avanzada
+### 18. Búsqueda avanzada
 GET http://localhost:3000/s4/api/posts/search?q=arquitectura hexagonal&page=1&limit=5
 
-### 15. Obtener posts con límite personalizado
+### 19. Obtener posts con límite personalizado
 GET http://localhost:3000/s4/api/posts?page=1&limit=20
 
 ### Notas importantes:

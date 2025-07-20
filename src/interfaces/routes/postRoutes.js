@@ -1,7 +1,7 @@
 const express = require('express');
 const PostController = require('../controllers/PostController');
 const FileUploadService = require('../../infrastructure/file-upload/FileUploadService');
-const { validateCreatePost, validatePagination } = require('../middleware/validation');
+const { validateCreatePost, validateUpdatePost, validatePagination } = require('../middleware/validation');
 
 const router = express.Router();
 
@@ -308,6 +308,81 @@ router.get('/tag/:tag', validatePagination, async (req, res) => {
 router.get('/:id', async (req, res) => {
   const postController = new PostController(req.app.locals.postRepository);
   await postController.getPostById(req, res);
+});
+
+/**
+ * @swagger
+ * /s4/api/posts/{id}:
+ *   put:
+ *     summary: Actualizar un post
+ *     description: Actualiza un post existente con nuevos datos
+ *     tags: [Posts]
+ *     parameters:
+ *       - $ref: '#/components/parameters/postId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 maxLength: 200
+ *                 description: Título del post (opcional)
+ *                 example: "Mi post actualizado sobre tecnología"
+ *               body:
+ *                 type: string
+ *                 description: Contenido del post (opcional)
+ *                 example: "Este es el contenido actualizado de mi post..."
+ *               authors:
+ *                 type: string
+ *                 description: JSON string con array de autores (opcional)
+ *                 example: '[{"id":"1","name":"Juan Pérez","email":"juan@example.com"}]'
+ *               tags:
+ *                 type: string
+ *                 description: JSON string con array de tags (opcional)
+ *                 example: '[{"value":"tecnología","color":"#007bff"}]'
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Imágenes del post (opcional, máximo 10)
+ *     responses:
+ *       200:
+ *         description: Post actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               message: "Post actualizado exitosamente"
+ *               data:
+ *                 $ref: '#/components/schemas/Post'
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Post no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.put('/:id', upload.array('images', 10), validateUpdatePost, async (req, res) => {
+  const postController = new PostController(req.app.locals.postRepository);
+  await postController.updatePost(req, res);
 });
 
 /**
