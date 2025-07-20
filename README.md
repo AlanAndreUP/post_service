@@ -98,14 +98,14 @@ npm start
 
 La API incluye documentación interactiva generada automáticamente con Swagger:
 
-- **Swagger UI**: http://localhost:3000/api-docs
-- **Swagger JSON**: http://localhost:3000/swagger.json
+- **Swagger UI**: http://localhost:3000/s4/api-docs
+- **Swagger JSON**: http://localhost:3000/s4/swagger.json
 
 ### Posts
 
 #### Crear Post
 ```http
-POST /api/posts
+POST /s4/api/posts
 Content-Type: multipart/form-data
 
 {
@@ -119,32 +119,32 @@ Content-Type: multipart/form-data
 
 #### Obtener Posts (con paginación)
 ```http
-GET /api/posts?page=1&limit=10&authorId=1&tag=tecnología
+GET /s4/api/posts?page=1&limit=10&authorId=1&tag=tecnología
 ```
 
 #### Obtener Post por ID
 ```http
-GET /api/posts/:id
+GET /s4/api/posts/:id
 ```
 
 #### Buscar Posts
 ```http
-GET /api/posts/search?q=tecnología&page=1&limit=10
+GET /s4/api/posts/search?q=tecnología&page=1&limit=10
 ```
 
 #### Posts por Autor
 ```http
-GET /api/posts/author/:authorId?page=1&limit=10
+GET /s4/api/posts/author/:authorId?page=1&limit=10
 ```
 
 #### Posts por Tag
 ```http
-GET /api/posts/tag/:tag?page=1&limit=10
+GET /s4/api/posts/tag/:tag?page=1&limit=10
 ```
 
 #### Subir Imágenes
 ```http
-POST /api/posts/upload
+POST /s4/api/posts/upload
 Content-Type: multipart/form-data
 
 {
@@ -154,13 +154,13 @@ Content-Type: multipart/form-data
 
 ### Health Check
 ```http
-GET /health
+GET /s4/health
 ```
 
 ### Documentación
 ```http
-GET /api-docs
-GET /swagger.json
+GET /s4/api-docs
+GET /s4/swagger.json
 ```
 
 ## 📊 Respuestas de la API

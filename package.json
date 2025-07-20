@@ -10,7 +10,7 @@
     "test:watch": "jest --watch",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
-    "docs:generate": "node -e \"console.log('Documentación disponible en: http://localhost:3000/api-docs')\"",
+    "docs:generate": "node -e \"console.log('Documentación disponible en: http://localhost:3000/s4/api-docs')\"",
     "docs:validate": "node -e \"const specs = require('./src/infrastructure/swagger/swaggerConfig'); console.log('✅ Especificación Swagger válida'); console.log('📊 Endpoints documentados:', Object.keys(specs.paths).length);\"",
     "docker:build": "docker build -t foro-service .",
     "docker:run": "docker run -p 3000:3000 foro-service",

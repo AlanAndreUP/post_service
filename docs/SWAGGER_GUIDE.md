@@ -8,9 +8,9 @@ Esta API utiliza **Swagger/OpenAPI 3.0** para generar documentación automática
 
 ### URLs de Documentación
 
-- **Interfaz Interactiva**: http://localhost:3000/api-docs
-- **Especificación JSON**: http://localhost:3000/swagger.json
-- **Información de la API**: http://localhost:3000/
+- **Interfaz Interactiva**: http://localhost:3000/s4/api-docs
+- **Especificación JSON**: http://localhost:3000/s4/swagger.json
+- **Información de la API**: http://localhost:3000/s4/
 
 ### Características Principales
 
@@ -24,7 +24,7 @@ Esta API utiliza **Swagger/OpenAPI 3.0** para generar documentación automática
 
 ### 1. Navegación
 
-1. **Abre** http://localhost:3000/api-docs en tu navegador
+1. **Abre** http://localhost:3000/s4/api-docs en tu navegador
 2. **Explora** los endpoints organizados por tags:
    - **Posts**: Endpoints relacionados con posts
    - **Files**: Endpoints para subida de archivos

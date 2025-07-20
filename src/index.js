@@ -92,7 +92,7 @@ class Application {
         message: 'Demasiadas peticiones desde esta IP, intenta de nuevo más tarde'
       }
     });
-    this.app.use('/api/', limiter);
+    this.app.use('/s4', limiter);
 
     // Parsing
     this.app.use(express.json({ limit: '10mb' }));
@@ -105,10 +105,13 @@ class Application {
   }
 
   setupRoutes() {
+    // Crear router para el prefijo s4
+    const s4Router = express.Router();
+
     // Health check
     /**
      * @swagger
-     * /health:
+     * /s4/health:
      *   get:
      *     summary: Health check
      *     description: Verifica el estado de la API y la conexión a la base de datos
@@ -147,7 +150,7 @@ class Application {
      *             schema:
      *               $ref: '#/components/schemas/ErrorResponse'
      */
-    this.app.get('/health', (req, res) => {
+    s4Router.get('/health', (req, res) => {
       const dbStatus = mongoDBConnection.getConnectionStatus();
       res.json({
         success: true,
@@ -161,21 +164,21 @@ class Application {
     });
 
     // Swagger documentation
-    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, swaggerOptions));
+    s4Router.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, swaggerOptions));
 
     // Swagger JSON endpoint
-    this.app.get('/swagger.json', (req, res) => {
+    s4Router.get('/swagger.json', (req, res) => {
       res.setHeader('Content-Type', 'application/json');
       res.send(swaggerSpecs);
     });
 
     // API routes
-    this.app.use('/api/posts', postRoutes);
+    s4Router.use('/api/posts', postRoutes);
 
-    // Ruta raíz
+    // Ruta raíz del prefijo s4
     /**
      * @swagger
-     * /:
+     * /s4:
      *   get:
      *     summary: Información de la API
      *     description: Obtiene información general sobre la API
@@ -210,19 +213,22 @@ class Application {
      *                       type: string
      *                       description: Información sobre documentación
      */
-    this.app.get('/', (req, res) => {
+    s4Router.get('/', (req, res) => {
       res.json({
         success: true,
         message: 'API de Foro Service - Arquitectura Hexagonal DDD',
         version: '1.0.0',
         endpoints: {
-          health: '/health',
-          posts: '/api/posts',
-          documentation: '/api-docs',
-          swagger: '/swagger'
+          health: '/s4/health',
+          posts: '/s4/api/posts',
+          documentation: '/s4/api-docs',
+          swagger: '/s4/swagger.json'
         }
       });
     });
+
+    // Aplicar el prefijo s4 a todas las rutas
+    this.app.use('/s4', s4Router);
 
     console.log('✅ Rutas configuradas');
   }
@@ -241,10 +247,10 @@ class Application {
     return new Promise((resolve, reject) => {
       this.server = this.app.listen(this.port, () => {
         console.log(`✅ Servidor iniciado en puerto ${this.port}`);
-        console.log(`🌐 API disponible en: http://localhost:${this.port}`);
-        console.log(`📊 Health check: http://localhost:${this.port}/health`);
-        console.log(`📝 Posts API: http://localhost:${this.port}/api/posts`);
-        console.log(`📚 Documentación Swagger: http://localhost:${this.port}/api-docs`);
+        console.log(`🌐 API disponible en: http://localhost:${this.port}/s4`);
+        console.log(`📊 Health check: http://localhost:${this.port}/s4/health`);
+        console.log(`📝 Posts API: http://localhost:${this.port}/s4/api/posts`);
+        console.log(`📚 Documentación Swagger: http://localhost:${this.port}/s4/api-docs`);
         resolve();
       });
 

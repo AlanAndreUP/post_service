@@ -13,7 +13,7 @@ const upload = fileUploadService.createUploadMiddleware();
 
 /**
  * @swagger
- * /api/posts:
+ * /s4/api/posts:
  *   post:
  *     summary: Crear un nuevo post
  *     description: Crea un nuevo post con título, cuerpo, autores, tags e imágenes opcionales
@@ -84,7 +84,7 @@ router.post('/', upload.array('images', 10), validateCreatePost, async (req, res
 
 /**
  * @swagger
- * /api/posts:
+ * /s4/api/posts:
  *   get:
  *     summary: Obtener posts con paginación
  *     description: Obtiene una lista paginada de posts con filtros opcionales
@@ -130,7 +130,7 @@ router.get('/', validatePagination, async (req, res) => {
 
 /**
  * @swagger
- * /api/posts/search:
+ * /s4/api/posts/search:
  *   get:
  *     summary: Buscar posts
  *     description: Busca posts por título, cuerpo o tags
@@ -176,7 +176,7 @@ router.get('/search', validatePagination, async (req, res) => {
 
 /**
  * @swagger
- * /api/posts/author/{authorId}:
+ * /s4/api/posts/author/{authorId}:
  *   get:
  *     summary: Obtener posts por autor
  *     description: Obtiene todos los posts de un autor específico
@@ -224,7 +224,7 @@ router.get('/author/:authorId', validatePagination, async (req, res) => {
 
 /**
  * @swagger
- * /api/posts/tag/{tag}:
+ * /s4/api/posts/tag/{tag}:
  *   get:
  *     summary: Obtener posts por tag
  *     description: Obtiene todos los posts que contengan un tag específico
@@ -272,7 +272,7 @@ router.get('/tag/:tag', validatePagination, async (req, res) => {
 
 /**
  * @swagger
- * /api/posts/{id}:
+ * /s4/api/posts/{id}:
  *   get:
  *     summary: Obtener post por ID
  *     description: Obtiene un post específico por su ID
@@ -312,7 +312,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * @swagger
- * /api/posts/upload:
+ * /s4/api/posts/upload:
  *   post:
  *     summary: Subir imágenes
  *     description: Sube imágenes independientemente y retorna información de los archivos
