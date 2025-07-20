@@ -70,6 +70,12 @@ const ImageSchema = new mongoose.Schema({
 
 // Schema principal para Post
 const PostSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    unique: true,
+    sparse: true,
+    index: true
+  },
   title: {
     type: String,
     required: true,

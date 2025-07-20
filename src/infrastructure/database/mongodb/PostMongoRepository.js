@@ -10,10 +10,10 @@ class PostMongoRepository extends PostRepository {
     try {
       const postData = post.toJSON();
       
-      // Si el post ya existe, actualizarlo
-      if (post.id) {
+      // Si el post ya existe (tiene un mongoId), actualizarlo
+      if (post.mongoId) {
         const updatedPost = await PostModel.findByIdAndUpdate(
-          post.id,
+          post.mongoId,
           postData,
           { new: true, runValidators: true }
         );
@@ -25,7 +25,8 @@ class PostMongoRepository extends PostRepository {
         return Post.fromJSON(updatedPost.toObject());
       }
       
-      // Si es un nuevo post, crearlo
+      // Si es un nuevo post, mantener el id (UUID) en el campo id y dejar que MongoDB genere el _id
+      
       const newPost = new PostModel(postData);
       const savedPost = await newPost.save();
       
@@ -37,7 +38,14 @@ class PostMongoRepository extends PostRepository {
 
   async findById(id) {
     try {
-      const post = await PostModel.findById(id);
+      // Intentar buscar por ObjectId primero
+      let post = await PostModel.findById(id);
+      
+      // Si no se encuentra, buscar por el campo id personalizado (UUID)
+      if (!post) {
+        post = await PostModel.findOne({ id });
+      }
+      
       return post ? Post.fromJSON(post.toObject()) : null;
     } catch (error) {
       throw new Error(`Error al buscar el post: ${error.message}`);

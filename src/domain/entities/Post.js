@@ -4,7 +4,7 @@ const Tag = require('../value-objects/Tag');
 const Image = require('../value-objects/Image');
 
 class Post {
-  constructor(id, title, body, authors, tags, images, createdAt, updatedAt) {
+  constructor(id, title, body, authors, tags, images, createdAt, updatedAt, mongoId) {
     this._id = id || uuidv4();
     this._title = title;
     this._body = body;
@@ -13,10 +13,12 @@ class Post {
     this._images = images || [];
     this._createdAt = createdAt || new Date();
     this._updatedAt = updatedAt || new Date();
+    this._mongoId = mongoId;
   }
 
   // Getters
   get id() { return this._id; }
+  get mongoId() { return this._mongoId; }
   get title() { return this._title; }
   get body() { return this._body; }
   get authors() { return [...this._authors]; }
@@ -79,7 +81,7 @@ class Post {
 
   // Método para convertir a objeto plano
   toJSON() {
-    return {
+    const result = {
       id: this._id,
       title: this._title,
       body: this._body,
@@ -89,6 +91,13 @@ class Post {
       createdAt: this._createdAt,
       updatedAt: this._updatedAt
     };
+
+    // Incluir _id si está disponible (para actualizaciones)
+    if (this._mongoId) {
+      result._id = this._mongoId;
+    }
+
+    return result;
   }
 
   // Método estático para crear desde datos
@@ -101,7 +110,8 @@ class Post {
       data.tags?.map(tag => Tag.fromJSON(tag)) || [],
       data.images?.map(image => Image.fromJSON(image)) || [],
       data.createdAt ? new Date(data.createdAt) : undefined,
-      data.updatedAt ? new Date(data.updatedAt) : undefined
+      data.updatedAt ? new Date(data.updatedAt) : undefined,
+      data._id // MongoDB ObjectId
     );
   }
 }
