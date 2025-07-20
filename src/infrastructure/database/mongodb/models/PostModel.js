@@ -104,6 +104,11 @@ const PostSchema = new mongoose.Schema({
   images: {
     type: [ImageSchema],
     default: []
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
+    index: true
   }
 }, {
   timestamps: true,
@@ -124,6 +129,22 @@ PostSchema.statics.findByAuthor = function(authorId) {
 
 PostSchema.statics.findByTag = function(tag) {
   return this.find({ 'tags.value': { $regex: tag, $options: 'i' } });
+};
+
+PostSchema.statics.softDelete = function(id) {
+  return this.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+};
+
+PostSchema.statics.restore = function(id) {
+  return this.findByIdAndUpdate(id, { deletedAt: null }, { new: true });
+};
+
+PostSchema.statics.findDeleted = function() {
+  return this.find({ deletedAt: { $ne: null } });
+};
+
+PostSchema.statics.findWithDeleted = function() {
+  return this.find().where({ includeDeleted: true });
 };
 
 // Métodos de instancia
@@ -168,6 +189,15 @@ PostSchema.pre('save', function(next) {
     return next(new Error('Al menos un autor es requerido'));
   }
 
+  next();
+});
+
+// Middleware para filtrar automáticamente posts eliminados
+PostSchema.pre(/^find/, function(next) {
+  // Solo aplicar el filtro si no se está buscando específicamente posts eliminados
+  if (!this.getQuery().includeDeleted) {
+    this.where({ deletedAt: null });
+  }
   next();
 });
 

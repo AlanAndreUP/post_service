@@ -4,7 +4,7 @@ const Tag = require('../value-objects/Tag');
 const Image = require('../value-objects/Image');
 
 class Post {
-  constructor(id, title, body, authors, tags, images, createdAt, updatedAt, mongoId) {
+  constructor(id, title, body, authors, tags, images, createdAt, updatedAt, mongoId, deletedAt) {
     this._id = id || uuidv4();
     this._title = title;
     this._body = body;
@@ -14,6 +14,7 @@ class Post {
     this._createdAt = createdAt || new Date();
     this._updatedAt = updatedAt || new Date();
     this._mongoId = mongoId;
+    this._deletedAt = deletedAt;
   }
 
   // Getters
@@ -26,6 +27,8 @@ class Post {
   get images() { return [...this._images]; }
   get createdAt() { return this._createdAt; }
   get updatedAt() { return this._updatedAt; }
+  get deletedAt() { return this._deletedAt; }
+  get isDeleted() { return this._deletedAt !== null && this._deletedAt !== undefined; }
 
   // Métodos de dominio
   addAuthor(author) {
@@ -72,6 +75,17 @@ class Post {
     this._updatedAt = new Date();
   }
 
+  // Métodos para soft delete
+  softDelete() {
+    this._deletedAt = new Date();
+    this._updatedAt = new Date();
+  }
+
+  restore() {
+    this._deletedAt = null;
+    this._updatedAt = new Date();
+  }
+
   // Método para validar el estado del agregado
   isValid() {
     return this._title && this._title.trim().length > 0 &&
@@ -89,7 +103,8 @@ class Post {
       tags: this._tags.map(tag => tag.toJSON()),
       images: this._images.map(image => image.toJSON()),
       createdAt: this._createdAt,
-      updatedAt: this._updatedAt
+      updatedAt: this._updatedAt,
+      deletedAt: this._deletedAt
     };
 
     // Incluir _id si está disponible (para actualizaciones)
@@ -111,7 +126,8 @@ class Post {
       data.images?.map(image => Image.fromJSON(image)) || [],
       data.createdAt ? new Date(data.createdAt) : undefined,
       data.updatedAt ? new Date(data.updatedAt) : undefined,
-      data._id // MongoDB ObjectId
+      data._id, // MongoDB ObjectId
+      data.deletedAt ? new Date(data.deletedAt) : undefined
     );
   }
 }

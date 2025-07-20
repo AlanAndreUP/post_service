@@ -27,6 +27,18 @@ class PostRepository {
     throw new Error('Método delete debe ser implementado');
   }
 
+  async softDelete(id) {
+    throw new Error('Método softDelete debe ser implementado');
+  }
+
+  async restore(id) {
+    throw new Error('Método restore debe ser implementado');
+  }
+
+  async findDeleted(page = 1, limit = 10) {
+    throw new Error('Método findDeleted debe ser implementado');
+  }
+
   async count(filters = {}) {
     throw new Error('Método count debe ser implementado');
   }

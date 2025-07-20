@@ -52,7 +52,16 @@ Content-Type: multipart/form-data
   "images": [@imagen1.jpg, @imagen2.png, @imagen3.gif]
 }
 
-### 11. Crear post con múltiples autores
+### 11. Soft Delete de un post
+DELETE http://localhost:3000/s4/api/posts/POST_ID_AQUI
+
+### 12. Restaurar un post eliminado
+POST http://localhost:3000/s4/api/posts/POST_ID_AQUI/restore
+
+### 13. Obtener posts eliminados
+GET http://localhost:3000/s4/api/posts/deleted?page=1&limit=10
+
+### 14. Crear post con múltiples autores
 POST http://localhost:3000/s4/api/posts
 Content-Type: multipart/form-data
 

@@ -2,6 +2,9 @@ const CreatePostUseCase = require('../../application/use-cases/CreatePostUseCase
 const GetPostsUseCase = require('../../application/use-cases/GetPostsUseCase');
 const GetPostByIdUseCase = require('../../application/use-cases/GetPostByIdUseCase');
 const SearchPostsUseCase = require('../../application/use-cases/SearchPostsUseCase');
+const SoftDeletePostUseCase = require('../../application/use-cases/SoftDeletePostUseCase');
+const RestorePostUseCase = require('../../application/use-cases/RestorePostUseCase');
+const GetDeletedPostsUseCase = require('../../application/use-cases/GetDeletedPostsUseCase');
 const FileUploadService = require('../../infrastructure/file-upload/FileUploadService');
 
 class PostController {
@@ -10,6 +13,9 @@ class PostController {
     this.getPostsUseCase = new GetPostsUseCase(postRepository);
     this.getPostByIdUseCase = new GetPostByIdUseCase(postRepository);
     this.searchPostsUseCase = new SearchPostsUseCase(postRepository);
+    this.softDeletePostUseCase = new SoftDeletePostUseCase(postRepository);
+    this.restorePostUseCase = new RestorePostUseCase(postRepository);
+    this.getDeletedPostsUseCase = new GetDeletedPostsUseCase(postRepository);
     this.fileUploadService = new FileUploadService();
   }
 
@@ -22,7 +28,7 @@ class PostController {
       const images = [];
       if (req.files && req.files.length > 0) {
         for (const file of req.files) {
-          const fileInfo = await this.fileUploadService.saveFileInfo(file, req.protocol + '://' + req.get('host'));
+          const fileInfo = await this.fileUploadService.saveFileInfo(file, `${req.protocol}://${req.get('host')}`);
           images.push(fileInfo);
         }
       }
@@ -204,7 +210,7 @@ class PostController {
 
       const uploadedFiles = [];
       for (const file of req.files) {
-        const fileInfo = await this.fileUploadService.saveFileInfo(file, req.protocol + '://' + req.get('host'));
+        const fileInfo = await this.fileUploadService.saveFileInfo(file, `${req.protocol}://${req.get('host')}`);
         uploadedFiles.push(fileInfo);
       }
 
@@ -216,6 +222,88 @@ class PostController {
 
     } catch (error) {
       console.error('Error al subir archivos:', error);
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+
+  // DELETE /api/posts/:id (Soft Delete)
+  async softDeletePost(req, res) {
+    try {
+      const { id } = req.params;
+      const post = await this.softDeletePostUseCase.execute(id);
+
+      res.status(200).json({
+        success: true,
+        message: 'Post eliminado exitosamente',
+        data: post.toJSON()
+      });
+
+    } catch (error) {
+      console.error('Error al eliminar post:', error);
+      
+      if (error.message === 'Post no encontrado') {
+        return res.status(404).json({
+          success: false,
+          message: error.message
+        });
+      }
+
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+
+  // POST /api/posts/:id/restore
+  async restorePost(req, res) {
+    try {
+      const { id } = req.params;
+      const post = await this.restorePostUseCase.execute(id);
+
+      res.status(200).json({
+        success: true,
+        message: 'Post restaurado exitosamente',
+        data: post.toJSON()
+      });
+
+    } catch (error) {
+      console.error('Error al restaurar post:', error);
+      
+      if (error.message === 'Post no encontrado') {
+        return res.status(404).json({
+          success: false,
+          message: error.message
+        });
+      }
+
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+
+  // GET /api/posts/deleted
+  async getDeletedPosts(req, res) {
+    try {
+      const { page = 1, limit = 10 } = req.query;
+      
+      const result = await this.getDeletedPostsUseCase.execute(page, limit);
+
+      res.status(200).json({
+        success: true,
+        data: {
+          posts: result.posts.map(post => post.toJSON()),
+          pagination: result.pagination
+        }
+      });
+
+    } catch (error) {
+      console.error('Error al obtener posts eliminados:', error);
       res.status(400).json({
         success: false,
         message: error.message

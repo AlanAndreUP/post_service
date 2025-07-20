@@ -360,4 +360,132 @@ router.post('/upload', upload.array('images', 10), async (req, res) => {
   await postController.uploadImages(req, res);
 });
 
+/**
+ * @swagger
+ * /s4/api/posts/deleted:
+ *   get:
+ *     summary: Obtener posts eliminados
+ *     description: Obtiene una lista paginada de posts que han sido eliminados suavemente
+ *     tags: [Posts]
+ *     parameters:
+ *       - $ref: '#/components/parameters/page'
+ *       - $ref: '#/components/parameters/limit'
+ *     responses:
+ *       200:
+ *         description: Lista de posts eliminados obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     posts:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Post'
+ *                     pagination:
+ *                       $ref: '#/components/schemas/Pagination'
+ *       400:
+ *         description: Parámetros inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/deleted', validatePagination, async (req, res) => {
+  const postController = new PostController(req.app.locals.postRepository);
+  await postController.getDeletedPosts(req, res);
+});
+
+/**
+ * @swagger
+ * /s4/api/posts/{id}:
+ *   delete:
+ *     summary: Eliminar post (Soft Delete)
+ *     description: Elimina suavemente un post marcándolo como eliminado sin borrarlo de la base de datos
+ *     tags: [Posts]
+ *     parameters:
+ *       - $ref: '#/components/parameters/postId'
+ *     responses:
+ *       200:
+ *         description: Post eliminado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Post eliminado exitosamente"
+ *                 data:
+ *                   $ref: '#/components/schemas/Post'
+ *       404:
+ *         description: Post no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       400:
+ *         description: Error al eliminar el post
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.delete('/:id', async (req, res) => {
+  const postController = new PostController(req.app.locals.postRepository);
+  await postController.softDeletePost(req, res);
+});
+
+/**
+ * @swagger
+ * /s4/api/posts/{id}/restore:
+ *   post:
+ *     summary: Restaurar post
+ *     description: Restaura un post que ha sido eliminado suavemente
+ *     tags: [Posts]
+ *     parameters:
+ *       - $ref: '#/components/parameters/postId'
+ *     responses:
+ *       200:
+ *         description: Post restaurado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Post restaurado exitosamente"
+ *                 data:
+ *                   $ref: '#/components/schemas/Post'
+ *       404:
+ *         description: Post no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       400:
+ *         description: Error al restaurar el post
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/:id/restore', async (req, res) => {
+  const postController = new PostController(req.app.locals.postRepository);
+  await postController.restorePost(req, res);
+});
+
 module.exports = router; 

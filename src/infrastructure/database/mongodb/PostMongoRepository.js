@@ -36,14 +36,20 @@ class PostMongoRepository extends PostRepository {
     }
   }
 
-  async findById(id) {
+  async findById(id, includeDeleted = false) {
     try {
+      const query = includeDeleted ? { includeDeleted: true } : {};
+      
       // Intentar buscar por ObjectId primero
-      let post = await PostModel.findById(id);
+      let post = await PostModel.findById(id).where(query);
       
       // Si no se encuentra, buscar por el campo id personalizado (UUID)
       if (!post) {
-        post = await PostModel.findOne({ id });
+        const uuidQuery = { id };
+        if (!includeDeleted) {
+          uuidQuery.deletedAt = null;
+        }
+        post = await PostModel.findOne(uuidQuery);
       }
       
       return post ? Post.fromJSON(post.toObject()) : null;
@@ -154,6 +160,40 @@ class PostMongoRepository extends PostRepository {
     }
   }
 
+  async softDelete(id) {
+    try {
+      const post = await PostModel.softDelete(id);
+      return post ? Post.fromJSON(post.toObject()) : null;
+    } catch (error) {
+      throw new Error(`Error al eliminar suavemente el post: ${error.message}`);
+    }
+  }
+
+  async restore(id) {
+    try {
+      const post = await PostModel.restore(id);
+      return post ? Post.fromJSON(post.toObject()) : null;
+    } catch (error) {
+      throw new Error(`Error al restaurar el post: ${error.message}`);
+    }
+  }
+
+  async findDeleted(page = 1, limit = 10) {
+    try {
+      const skip = (page - 1) * limit;
+      
+      const posts = await PostModel
+        .findDeleted()
+        .sort({ deletedAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+      return posts.map(post => Post.fromJSON(post.toObject()));
+    } catch (error) {
+      throw new Error(`Error al obtener posts eliminados: ${error.message}`);
+    }
+  }
+
   async count(filters = {}) {
     try {
       const query = {};
@@ -184,6 +224,13 @@ class PostMongoRepository extends PostRepository {
         } else {
           query.createdAt = { $lte: new Date(filters.dateTo) };
         }
+      }
+
+      // Manejar filtro de posts eliminados
+      if (filters.deleted === true) {
+        query.deletedAt = { $ne: null };
+      } else if (filters.deleted === false) {
+        query.deletedAt = null;
       }
 
       return await PostModel.countDocuments(query);
