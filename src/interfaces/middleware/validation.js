@@ -24,7 +24,8 @@ const paginationSchema = Joi.object({
   authorId: Joi.string().optional(),
   tag: Joi.string().optional(),
   dateFrom: Joi.date().iso().optional(),
-  dateTo: Joi.date().iso().optional()
+  dateTo: Joi.date().iso().optional(),
+  q: Joi.string().optional() // Para búsquedas
 });
 
 // Esquema de validación para búsqueda

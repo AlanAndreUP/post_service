@@ -38,12 +38,18 @@ class PostMongoRepository extends PostRepository {
 
   async findById(id, includeDeleted = false) {
     try {
-      const query = includeDeleted ? { includeDeleted: true } : {};
+      // Verificar si el ID es un ObjectId válido
+      const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
       
-      // Intentar buscar por ObjectId primero
-      let post = await PostModel.findById(id).where(query);
+      let post = null;
       
-      // Si no se encuentra, buscar por el campo id personalizado (UUID)
+      if (isValidObjectId) {
+        // Si es un ObjectId válido, buscar por _id
+        const query = includeDeleted ? { includeDeleted: true } : {};
+        post = await PostModel.findById(id).where(query);
+      }
+      
+      // Si no se encuentra o no es un ObjectId válido, buscar por el campo id personalizado (UUID)
       if (!post) {
         const uuidQuery = { id };
         if (!includeDeleted) {
