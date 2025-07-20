@@ -132,11 +132,27 @@ PostSchema.statics.findByTag = function(tag) {
 };
 
 PostSchema.statics.softDelete = function(id) {
-  return this.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+  // Verificar si el ID es un ObjectId válido
+  const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+  
+  if (isValidObjectId) {
+    return this.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+  } else {
+    // Si no es un ObjectId, buscar por el campo id personalizado (UUID)
+    return this.findOneAndUpdate({ id }, { deletedAt: new Date() }, { new: true });
+  }
 };
 
 PostSchema.statics.restore = function(id) {
-  return this.findByIdAndUpdate(id, { deletedAt: null }, { new: true });
+  // Verificar si el ID es un ObjectId válido
+  const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+  
+  if (isValidObjectId) {
+    return this.findByIdAndUpdate(id, { deletedAt: null }, { new: true });
+  } else {
+    // Si no es un ObjectId, buscar por el campo id personalizado (UUID)
+    return this.findOneAndUpdate({ id }, { deletedAt: null }, { new: true });
+  }
 };
 
 PostSchema.statics.findDeleted = function() {

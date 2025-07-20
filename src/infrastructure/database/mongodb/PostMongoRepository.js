@@ -159,7 +159,17 @@ class PostMongoRepository extends PostRepository {
 
   async delete(id) {
     try {
-      const result = await PostModel.findByIdAndDelete(id);
+      // Verificar si el ID es un ObjectId válido
+      const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+      
+      let result = null;
+      
+      if (isValidObjectId) {
+        result = await PostModel.findByIdAndDelete(id);
+      } else {
+        result = await PostModel.findOneAndDelete({ id });
+      }
+      
       return result !== null;
     } catch (error) {
       throw new Error(`Error al eliminar el post: ${error.message}`);
