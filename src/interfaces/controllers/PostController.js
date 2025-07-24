@@ -6,7 +6,7 @@ const UpdatePostUseCase = require('../../application/use-cases/UpdatePostUseCase
 const SoftDeletePostUseCase = require('../../application/use-cases/SoftDeletePostUseCase');
 const RestorePostUseCase = require('../../application/use-cases/RestorePostUseCase');
 const GetDeletedPostsUseCase = require('../../application/use-cases/GetDeletedPostsUseCase');
-const FileUploadService = require('../../infrastructure/file-upload/FileUploadService');
+const CloudflareR2Service = require('../../infrastructure/file-upload/CloudflareR2Service');
 
 class PostController {
   constructor(postRepository) {
@@ -18,7 +18,7 @@ class PostController {
     this.softDeletePostUseCase = new SoftDeletePostUseCase(postRepository);
     this.restorePostUseCase = new RestorePostUseCase(postRepository);
     this.getDeletedPostsUseCase = new GetDeletedPostsUseCase(postRepository);
-    this.fileUploadService = new FileUploadService();
+    this.fileUploadService = new CloudflareR2Service();
   }
 
   // POST /api/posts
@@ -30,7 +30,7 @@ class PostController {
       const images = [];
       if (req.files && req.files.length > 0) {
         for (const file of req.files) {
-          const fileInfo = await this.fileUploadService.saveFileInfo(file, `${req.protocol}://${req.get('host')}`);
+          const fileInfo = await this.fileUploadService.uploadFile(file);
           images.push(fileInfo);
         }
       }
@@ -154,7 +154,7 @@ class PostController {
       if (req.files && req.files.length > 0) {
         images = [];
         for (const file of req.files) {
-          const fileInfo = await this.fileUploadService.saveFileInfo(file, `${req.protocol}://${req.get('host')}`);
+          const fileInfo = await this.fileUploadService.uploadFile(file);
           images.push(fileInfo);
         }
       }
@@ -319,7 +319,7 @@ class PostController {
 
       const uploadedFiles = [];
       for (const file of req.files) {
-        const fileInfo = await this.fileUploadService.saveFileInfo(file, `${req.protocol}://${req.get('host')}`);
+        const fileInfo = await this.fileUploadService.uploadFile(file);
         uploadedFiles.push(fileInfo);
       }
 

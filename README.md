@@ -58,6 +58,16 @@ git clone <repository-url>
 cd foro-service
 ```
 
+2. **Configurar variables de entorno**
+```bash
+cp env.example .env
+# Editar .env con tus configuraciones
+```
+
+3. **Configurar Cloudflare R2 (Opcional)**
+- Sigue la guía en [docs/CLOUDFLARE_R2_SETUP.md](docs/CLOUDFLARE_R2_SETUP.md)
+- O usa almacenamiento local por defecto
+
 2. **Instalar dependencias**
 ```bash
 npm install

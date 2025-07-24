@@ -1,12 +1,12 @@
 const express = require('express');
 const PostController = require('../controllers/PostController');
-const FileUploadService = require('../../infrastructure/file-upload/FileUploadService');
+const CloudflareR2Service = require('../../infrastructure/file-upload/CloudflareR2Service');
 const { validateCreatePost, validateUpdatePost, validatePagination } = require('../middleware/validation');
 
 const router = express.Router();
 
 // Inicializar servicios
-const fileUploadService = new FileUploadService();
+const fileUploadService = new CloudflareR2Service();
 
 // Middleware de subida de archivos
 const upload = fileUploadService.createUploadMiddleware();
