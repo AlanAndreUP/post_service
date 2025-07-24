@@ -7,6 +7,9 @@ const { v4: uuidv4 } = require('uuid');
 
 class CloudflareR2Service {
   constructor() {
+    // Validar configuración al inicializar
+    this.validateConfig();
+    
     this.s3Client = new S3Client({
       region: 'auto',
       endpoint: process.env.CLOUDFLARE_R2_ENDPOINT,
@@ -62,11 +65,18 @@ class CloudflareR2Service {
   // Subir archivo a R2
   async uploadFile(file) {
     try {
+      console.log('🚀 Iniciando subida de archivo a R2...');
+      console.log(`📁 Archivo: ${file.originalname}`);
+      console.log(`📦 Bucket: ${this.bucketName}`);
+      
       const fileExtension = path.extname(file.originalname);
       const fileName = `${uuidv4()}-${Date.now()}${fileExtension}`;
       const key = `posts/${fileName}`;
 
+      console.log(`🔑 Key: ${key}`);
+
       const fileBuffer = fs.readFileSync(file.path);
+      console.log(`📊 Tamaño del archivo: ${fileBuffer.length} bytes`);
 
       const uploadParams = {
         Bucket: this.bucketName,
@@ -80,13 +90,16 @@ class CloudflareR2Service {
         }
       };
 
+      console.log('📤 Enviando comando de subida...');
       const command = new PutObjectCommand(uploadParams);
       await this.s3Client.send(command);
+
+      console.log('✅ Archivo subido exitosamente');
 
       // Limpiar archivo temporal
       fs.unlinkSync(file.path);
 
-      return {
+      const fileInfo = {
         id: uuidv4(),
         filename: fileName,
         originalName: file.originalname,
@@ -96,7 +109,12 @@ class CloudflareR2Service {
         alt: file.originalname,
         key
       };
+
+      console.log(`🔗 URL del archivo: ${fileInfo.url}`);
+      return fileInfo;
     } catch (error) {
+      console.error('❌ Error al subir archivo:', error);
+      
       // Limpiar archivo temporal en caso de error
       if (fs.existsSync(file.path)) {
         fs.unlinkSync(file.path);
@@ -158,6 +176,21 @@ class CloudflareR2Service {
     if (missingVars.length > 0) {
       throw new Error(`Variables de entorno faltantes para Cloudflare R2: ${missingVars.join(', ')}`);
     }
+
+    // Validar formato del endpoint
+    const endpoint = process.env.CLOUDFLARE_R2_ENDPOINT;
+    if (!endpoint.includes('r2.cloudflarestorage.com')) {
+      throw new Error('CLOUDFLARE_R2_ENDPOINT debe ser un endpoint válido de R2');
+    }
+
+    // Validar que el endpoint no incluya el nombre del bucket
+    if (endpoint.includes(`/${process.env.CLOUDFLARE_R2_BUCKET_NAME}`)) {
+      throw new Error('CLOUDFLARE_R2_ENDPOINT no debe incluir el nombre del bucket');
+    }
+
+    console.log('✅ Configuración de Cloudflare R2 validada correctamente');
+    console.log(`📦 Bucket: ${process.env.CLOUDFLARE_R2_BUCKET_NAME}`);
+    console.log(`🌐 Endpoint: ${process.env.CLOUDFLARE_R2_ENDPOINT}`);
   }
 
   // Obtener información del archivo
